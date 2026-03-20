@@ -38,7 +38,7 @@ jobs:
 
       # 5. ESLint — catches lint errors, fails on warnings
       - name: Lint
-        run: npx eslint . --max-warnings=0
+        run: npx eslint . --max-warnings=0 --no-warn-ignored
 
       # 6. Next.js production build — confirms the app actually compiles
       - name: Build
