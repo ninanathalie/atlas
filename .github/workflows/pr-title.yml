@@ -23,8 +23,8 @@ jobs:
           TITLE="${{ github.event.pull_request.title }}"
 
           # Required format: type(scope): message  OR  type: message
-          # Allowed types aligned with branch naming convention and commitlint config
-          PATTERN='^(feat|fix|hotfix|chore|docs|refactor|test)(\([a-z0-9-]+\))?: .+'
+          # Allowed types aligned with commitlint config
+          PATTERN='^(feat|fix|hotfix|chore|docs|style|refactor|test|build|ci|revert|perf)(\([a-z0-9-]+\))?: .+'
 
           if [[ ! "$TITLE" =~ $PATTERN ]]; then
             echo ""
@@ -33,7 +33,7 @@ jobs:
             echo "   Title:           '$TITLE'"
             echo ""
             echo "   Required format: type(scope): message"
-            echo "   Allowed types:   feat, fix, hotfix, chore, docs, refactor, test"
+            echo "   Allowed types:   feat, fix, hotfix, chore, docs, style, refactor, test, build, ci, revert, perf"
             echo "   Scope:           optional, lowercase alphanumeric with hyphens"
             echo ""
             echo "   Examples:"
