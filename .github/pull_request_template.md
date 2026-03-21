@@ -8,10 +8,16 @@
 
 - [ ] feat: New feature
 - [ ] fix: Bug fix
+- [ ] hotfix: Urgent production fix
 - [ ] chore: Tooling/config
-- [ ] refactor: Code restructuring
 - [ ] docs: Documentation
+- [ ] style: Formatting, no logic change
+- [ ] refactor: Code restructuring
+- [ ] test: Adding or fixing tests
+- [ ] build: Build system or dependencies
 - [ ] ci: CI/CD changes
+- [ ] revert: Reverting a previous commit
+- [ ] perf: Performance improvement
 
 ## Test plan
 
