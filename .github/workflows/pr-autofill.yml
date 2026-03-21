@@ -1,0 +1,59 @@
+name: Auto-fill PR Details
+
+# Automatically populates PR details when opened from an ATLAS branch.
+# Extracts issue number from branch name, adds closing keyword,
+# assigns author, and links to the project board.
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  autofill:
+    name: Auto-fill PR Details
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Auto-fill PR details from branch
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const branch = pr.head.ref;
+
+            // Extract issue number from branch name (e.g., feat/ATLAS-07 → 7)
+            const match = branch.match(/ATLAS-(\d+)/);
+            if (!match) {
+              console.log(`Branch '${branch}' does not follow ATLAS convention — skipping.`);
+              return;
+            }
+
+            const issueNumber = parseInt(match[1], 10);
+
+            // Only update description if it's empty or unchanged from default
+            const body = pr.body || "";
+            if (!body.includes(`Closes #${issueNumber}`)) {
+              const newBody = body
+                ? `${body}\n\nCloses #${issueNumber}`
+                : `Closes #${issueNumber}`;
+
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                body: newBody,
+              });
+            }
+
+            // Auto-assign PR to the author
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              assignees: [pr.user.login],
+            });
+
+            console.log(`✅ PR #${pr.number} linked to issue #${issueNumber} and assigned to ${pr.user.login}.`);
