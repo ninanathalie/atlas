@@ -1,0 +1,74 @@
+name: Create Branch from Issue
+
+# Automatically creates a feature branch from develop when an issue
+# is labeled 'ready-for-dev'. Branch follows the ATLAS naming convention.
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  create-branch:
+    if: github.event.label.name == 'ready-for-dev'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Create branch and comment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map((l) => l.name);
+
+            // Determine branch type from issue labels
+            let type = "feat";
+            if (labels.includes("bug")) type = "fix";
+            else if (labels.includes("chore")) type = "chore";
+            else if (labels.includes("improvement")) type = "refactor";
+
+            // Branch format: {type}/ATLAS-{issue number}
+            const branchName = `${type}/ATLAS-${String(issue.number).padStart(2, "0")}`;
+
+            // Get SHA of develop (base branch)
+            const { data: ref } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "heads/develop",
+            });
+
+            // Check if branch already exists
+            try {
+              await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${branchName}`,
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `⚠️ Branch \`${branchName}\` already exists.\n\nTo start working:\n\`\`\`\ngit fetch origin\ngit checkout ${branchName}\n\`\`\``,
+              });
+              return;
+            } catch (e) {
+              // Branch doesn't exist — continue to create it
+            }
+
+            // Create the new branch
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/heads/${branchName}`,
+              sha: ref.object.sha,
+            });
+
+            // Comment on the issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `🌿 Branch created: \`${branchName}\`\n\nTo start working:\n\`\`\`\ngit fetch origin\ngit checkout ${branchName}\n\`\`\``,
+            });
