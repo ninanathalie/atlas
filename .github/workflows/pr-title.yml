@@ -1,0 +1,47 @@
+name: PR Title Validation
+
+# Validates that PR titles follow the conventional commit format.
+# Required format: type(scope): message — scope is optional.
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches:
+      - develop
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+
+          # Required format: type(scope): message  OR  type: message
+          # Allowed types: feat, fix, hotfix, chore, docs, style, refactor, test, build, ci, revert, perf
+          PATTERN='^(feat|fix|hotfix|chore|docs|style|refactor|test|build|ci|revert|perf)(\([a-z0-9-]+\))?: .+'
+
+          if [[ ! "$TITLE" =~ $PATTERN ]]; then
+            echo ""
+            echo "❌ PR title does not follow the conventional commit format."
+            echo ""
+            echo "   Title:           '$TITLE'"
+            echo ""
+            echo "   Required format: type(scope): message"
+            echo "   Allowed types:   feat, fix, hotfix, chore, docs, style, refactor, test, build, ci, revert, perf"
+            echo "   Scope:           optional, lowercase alphanumeric with hyphens"
+            echo ""
+            echo "   Examples:"
+            echo "     feat(auth): add login page"
+            echo "     fix: resolve build error on deploy"
+            echo "     chore(deps): update dependencies"
+            echo ""
+            exit 1
+          fi
+
+          echo "✅ PR title '$TITLE' is valid."
