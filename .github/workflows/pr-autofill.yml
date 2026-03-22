@@ -83,10 +83,9 @@ jobs:
               console.log(`⚠️ Could not fetch issue #${issueNumber}: ${e.message}`);
             }
 
-            // Build scope summary from commits
-            // Extract unique change descriptions from commit messages
+            // Build scope section with summary sentence and change bullets
             const commitLines = commits.split("\n").filter(Boolean);
-            const summaryBullets = commitLines
+            const changeBullets = commitLines
               .map((line) => {
                 // Remove the "- " prefix and any type(scope): prefix
                 return line.replace(/^- /, "").replace(/^[a-z]+(\([^)]*\))?:\s*/i, "");
@@ -95,29 +94,18 @@ jobs:
               .slice(0, 5) // max 5 bullets
               .map((line) => `- ${line.charAt(0).toUpperCase() + line.slice(1)}`);
 
-            description += `## Scope\n`;
-            if (summaryBullets.length > 0) {
-              description += `${summaryBullets.join("\n")}\n\n`;
-            }
+            // Generate a summary sentence from the PR title and issue
+            const prTitle = pr.title.replace(/^[a-z]+(\([^)]*\))?:\s*/i, "");
+            const summary = issueTitle
+              ? `This PR addresses #${issueNumber} (${issueTitle}). ${prTitle.charAt(0).toUpperCase() + prTitle.slice(1)}.`
+              : `${prTitle.charAt(0).toUpperCase() + prTitle.slice(1)}.`;
 
-            if (commits) {
-              description += `## Commits\n${commits}\n\n`;
+            description += `## Scope\n${summary}\n\n`;
+            if (changeBullets.length > 0) {
+              description += `**Changes:**\n${changeBullets.join("\n")}\n\n`;
             }
 
             description += `## Linked Issue\n**#${issueNumber}** — ${issueTitle}\n\n`;
-
-            // Get changed files summary
-            try {
-              const files = execSync(
-                `git diff --stat origin/${pr.base.ref}..HEAD`
-              ).toString().trim();
-
-              if (files) {
-                description += `## Files Changed\n\`\`\`\n${files}\n\`\`\`\n\n`;
-              }
-            } catch (e) {
-              console.log("⚠️ Could not read file diff:", e.message);
-            }
 
             description += `Closes #${issueNumber}`;
 
