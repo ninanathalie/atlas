@@ -1,7 +1,7 @@
 name: Auto-fill PR Details
 
 # Automatically populates PR details when opened from an ATLAS branch.
-# Generates description from commits and issue context, links issue,
+# Generates description from issue context and diff analysis, links issue,
 # assigns author, copies labels, and adds to the project board.
 on:
   pull_request:
@@ -43,23 +43,14 @@ jobs:
             }
 
             const issueNumber = parseInt(match[1], 10);
+            const base = pr.base.ref;
 
-            // --- Generate PR description from commits and issue ---
-            let description = "";
+            // --- Gather context ---
 
-            // Get commit messages for this PR
-            let commits = "";
-            try {
-              const base = pr.base.ref;
-              commits = execSync(
-                `git log origin/${base}..HEAD --pretty=format:"- %s" --reverse`
-              ).toString().trim();
-            } catch (e) {
-              console.log("⚠️ Could not read commit log:", e.message);
-            }
-
-            // Get linked issue details and build scope summary
+            // Get linked issue details (title, body, labels)
             let issueTitle = "";
+            let issueBody = "";
+            let issueLabels = [];
             try {
               const { data: issue } = await github.rest.issues.get({
                 owner: context.repo.owner,
@@ -68,45 +59,117 @@ jobs:
               });
 
               issueTitle = issue.title;
+              issueBody = issue.body || "";
+              issueLabels = issue.labels.map((l) => l.name);
 
               // Copy labels from issue to PR
-              const labels = issue.labels.map((l) => l.name);
-              if (labels.length > 0) {
+              if (issueLabels.length > 0) {
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  labels: labels,
+                  labels: issueLabels,
                 });
               }
             } catch (e) {
               console.log(`⚠️ Could not fetch issue #${issueNumber}: ${e.message}`);
             }
 
-            // Build scope section with summary sentence and change bullets
-            const commitLines = commits.split("\n").filter(Boolean);
-            const changeBullets = commitLines
-              .map((line) => {
-                // Remove the "- " prefix and any type(scope): prefix
-                return line.replace(/^- /, "").replace(/^[a-z]+(\([^)]*\))?:\s*/i, "");
-              })
-              .filter((line, index, self) => self.indexOf(line) === index) // dedupe
-              .slice(0, 5) // max 5 bullets
-              .map((line) => `- ${line.charAt(0).toUpperCase() + line.slice(1)}`);
+            // Get file-level diff stats
+            let fileStats = [];
+            try {
+              const diffStat = execSync(
+                `git diff --numstat origin/${base}..HEAD`
+              ).toString().trim();
 
-            // Generate a summary sentence from the PR title and issue
-            const prTitle = pr.title.replace(/^[a-z]+(\([^)]*\))?:\s*/i, "");
-            const summary = issueTitle
-              ? `This PR addresses #${issueNumber} (${issueTitle}). ${prTitle.charAt(0).toUpperCase() + prTitle.slice(1)}.`
-              : `${prTitle.charAt(0).toUpperCase() + prTitle.slice(1)}.`;
+              fileStats = diffStat.split("\n").filter(Boolean).map((line) => {
+                const [added, deleted, file] = line.split("\t");
+                return { file, added: parseInt(added) || 0, deleted: parseInt(deleted) || 0 };
+              });
+            } catch (e) {
+              console.log("⚠️ Could not read diff stats:", e.message);
+            }
 
-            description += `## Scope\n${summary}\n\n`;
+            // --- Build Scope section ---
+
+            // Extract the issue overview (first paragraph after "## Overview")
+            let scopeSummary = "";
+            const overviewMatch = issueBody.match(/## Overview\s*\n([\s\S]*?)(?=\n##|\n- \[|$)/);
+            if (overviewMatch) {
+              scopeSummary = overviewMatch[1].trim();
+            } else {
+              // Fallback to issue title
+              scopeSummary = issueTitle;
+            }
+
+            // --- Build Changes section ---
+            // Match completed acceptance criteria or derive from diff
+
+            const changeBullets = [];
+
+            // Try to match changes against acceptance criteria from issue
+            const criteriaMatches = issueBody.match(/- \[[ x]\] .+/g) || [];
+            const criteria = criteriaMatches.map((c) =>
+              c.replace(/- \[[ x]\] /, "").trim()
+            );
+
+            // Map changed files/directories to relevant criteria
+            const changedDirs = [...new Set(fileStats.map((f) => {
+              const parts = f.file.split("/");
+              return parts.length > 1 ? parts.slice(0, 2).join("/") : parts[0];
+            }))];
+
+            // For each criterion, check if any changed file seems related
+            for (const criterion of criteria) {
+              const keywords = criterion.toLowerCase().split(/\s+/);
+              const isRelevant = changedDirs.some((dir) =>
+                keywords.some((kw) => dir.toLowerCase().includes(kw))
+              ) || fileStats.some((f) =>
+                keywords.some((kw) => f.file.toLowerCase().includes(kw))
+              );
+
+              if (isRelevant) {
+                changeBullets.push(`- ${criterion}`);
+              }
+            }
+
+            // If no criteria matched, fall back to describing changes by directory
+            if (changeBullets.length === 0) {
+              const dirSummary = {};
+              for (const f of fileStats) {
+                const dir = f.file.split("/").slice(0, 2).join("/");
+                if (!dirSummary[dir]) dirSummary[dir] = { added: 0, deleted: 0, count: 0 };
+                dirSummary[dir].added += f.added;
+                dirSummary[dir].deleted += f.deleted;
+                dirSummary[dir].count++;
+              }
+
+              for (const [dir, stats] of Object.entries(dirSummary)) {
+                const action = stats.deleted === 0 ? "Add" : stats.added > stats.deleted ? "Update" : "Refactor";
+                changeBullets.push(`- ${action} \`${dir}\` (${stats.count} file${stats.count > 1 ? "s" : ""}, +${stats.added} -${stats.deleted})`);
+              }
+            }
+
+            // --- Build Impact section ---
+            const impactBullets = fileStats
+              .slice(0, 10) // max 10 files
+              .map((f) => {
+                const action = f.deleted === 0 ? "Added" : f.added > 0 && f.deleted > 0 ? "Modified" : "Removed";
+                return `- \`${f.file}\` — ${action} (+${f.added}, -${f.deleted})`;
+              });
+
+            // --- Assemble description ---
+            let description = `## Scope\n${scopeSummary}\n\n`;
+
             if (changeBullets.length > 0) {
               description += `**Changes:**\n${changeBullets.join("\n")}\n\n`;
             }
 
-            description += `## Linked Issue\n**#${issueNumber}** — ${issueTitle}\n\n`;
+            if (impactBullets.length > 0) {
+              description += `**Impact:**\n${impactBullets.join("\n")}\n\n`;
+            }
 
+            description += `## Linked Issue\n**#${issueNumber}** — ${issueTitle}\n\n`;
             description += `Closes #${issueNumber}`;
 
             // Update PR description
@@ -129,7 +192,6 @@ jobs:
             const projectToken = process.env.PROJECT_TOKEN;
             if (projectToken) {
               try {
-                const { Octokit } = await import("@octokit/rest");
                 const { graphql } = await import("@octokit/graphql");
 
                 const gql = graphql.defaults({
