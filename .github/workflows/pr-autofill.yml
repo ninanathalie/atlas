@@ -5,7 +5,7 @@ name: Auto-fill PR Details
 # assigns author, copies labels, and adds to the project board.
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 jobs:
   autofill:
