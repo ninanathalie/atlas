@@ -1,0 +1,137 @@
+name: Weekly Improvement Suggestions
+
+# Runs weekly to analyze the repo and draft improvement/bug fix issues.
+# Drafted issues are created with the "suggestion" label and remain
+# unpublished until the "approved-for-publish" label is manually applied.
+on:
+  schedule:
+    # Runs every Monday at 9:00 AM UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch: # Allow manual trigger for testing
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  suggest:
+    name: Analyze and Suggest Improvements
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Analyze and create suggestion issues
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const { execSync } = require("child_process");
+            const suggestions = [];
+
+            // 1. Check for outdated dependencies
+            try {
+              const outdated = execSync("npm outdated --json 2>/dev/null || true").toString();
+              const parsed = JSON.parse(outdated || "{}");
+              const outdatedCount = Object.keys(parsed).length;
+
+              if (outdatedCount > 0) {
+                const deps = Object.entries(parsed)
+                  .map(([name, info]) => `- \`${name}\`: ${info.current} → ${info.latest}`)
+                  .join("\n");
+
+                suggestions.push({
+                  title: `chore(deps): ${outdatedCount} outdated dependencies found`,
+                  body: `## Overview\nThe following dependencies have newer versions available:\n\n${deps}\n\n## Suggested Action\nReview and update dependencies to their latest compatible versions.`,
+                });
+              }
+            } catch (e) {
+              console.log("⚠️ Could not check outdated dependencies:", e.message);
+            }
+
+            // 2. Check for TypeScript errors
+            try {
+              execSync("npx tsc --noEmit 2>&1");
+            } catch (e) {
+              const errors = e.stdout?.toString() || "";
+              const errorCount = (errors.match(/error TS/g) || []).length;
+
+              if (errorCount > 0) {
+                suggestions.push({
+                  title: `fix: ${errorCount} TypeScript error(s) detected`,
+                  body: `## Overview\nTypeScript type checking found ${errorCount} error(s).\n\n\`\`\`\n${errors.slice(0, 2000)}\n\`\`\`\n\n## Suggested Action\nFix the type errors to maintain type safety.`,
+                });
+              }
+            }
+
+            // 3. Check for lint warnings/errors
+            try {
+              execSync("npx eslint . --no-warn-ignored 2>&1");
+            } catch (e) {
+              const output = e.stdout?.toString() || "";
+
+              suggestions.push({
+                title: "fix: ESLint violations detected",
+                body: `## Overview\nESLint found issues in the codebase.\n\n\`\`\`\n${output.slice(0, 2000)}\n\`\`\`\n\n## Suggested Action\nReview and fix the lint violations.`,
+              });
+            }
+
+            // 4. Check for TODOs/FIXMEs in code
+            try {
+              const todos = execSync('grep -rn "TODO\\|FIXME\\|HACK\\|XXX" src/ --include="*.ts" --include="*.tsx" 2>/dev/null || true').toString().trim();
+
+              if (todos) {
+                const todoCount = todos.split("\n").length;
+                suggestions.push({
+                  title: `chore: ${todoCount} TODO/FIXME comment(s) found in codebase`,
+                  body: `## Overview\nThe following TODO/FIXME comments were found:\n\n\`\`\`\n${todos.slice(0, 2000)}\n\`\`\`\n\n## Suggested Action\nReview and resolve or convert to tracked issues.`,
+                });
+              }
+            } catch (e) {
+              console.log("⚠️ Could not scan for TODOs:", e.message);
+            }
+
+            // Create issues for each suggestion
+            for (const suggestion of suggestions) {
+              // Check if a similar issue already exists
+              const { data: existing } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: "suggestion",
+                state: "open",
+              });
+
+              const alreadyExists = existing.some((issue) =>
+                issue.title === suggestion.title
+              );
+
+              if (alreadyExists) {
+                console.log(`⏭️ Skipping duplicate: "${suggestion.title}"`);
+                continue;
+              }
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: suggestion.title,
+                body: suggestion.body,
+                labels: ["suggestion"],
+              });
+
+              console.log(`✅ Created suggestion: "${suggestion.title}"`);
+            }
+
+            if (suggestions.length === 0) {
+              console.log("✅ No suggestions this week — codebase looks clean!");
+            }
