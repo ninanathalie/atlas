@@ -48,20 +48,18 @@ jobs:
             let description = "";
 
             // Get commit messages for this PR
+            let commits = "";
             try {
               const base = pr.base.ref;
-              const commits = execSync(
+              commits = execSync(
                 `git log origin/${base}..HEAD --pretty=format:"- %s" --reverse`
               ).toString().trim();
-
-              if (commits) {
-                description += `## Commits\n${commits}\n\n`;
-              }
             } catch (e) {
               console.log("⚠️ Could not read commit log:", e.message);
             }
 
-            // Get linked issue details
+            // Get linked issue details and build scope summary
+            let issueTitle = "";
             try {
               const { data: issue } = await github.rest.issues.get({
                 owner: context.repo.owner,
@@ -69,7 +67,7 @@ jobs:
                 issue_number: issueNumber,
               });
 
-              description += `## Linked Issue\n**#${issueNumber}** — ${issue.title}\n\n`;
+              issueTitle = issue.title;
 
               // Copy labels from issue to PR
               const labels = issue.labels.map((l) => l.name);
@@ -84,6 +82,29 @@ jobs:
             } catch (e) {
               console.log(`⚠️ Could not fetch issue #${issueNumber}: ${e.message}`);
             }
+
+            // Build scope summary from commits
+            // Extract unique change descriptions from commit messages
+            const commitLines = commits.split("\n").filter(Boolean);
+            const summaryBullets = commitLines
+              .map((line) => {
+                // Remove the "- " prefix and any type(scope): prefix
+                return line.replace(/^- /, "").replace(/^[a-z]+(\([^)]*\))?:\s*/i, "");
+              })
+              .filter((line, index, self) => self.indexOf(line) === index) // dedupe
+              .slice(0, 5) // max 5 bullets
+              .map((line) => `- ${line.charAt(0).toUpperCase() + line.slice(1)}`);
+
+            description += `## Scope\n`;
+            if (summaryBullets.length > 0) {
+              description += `${summaryBullets.join("\n")}\n\n`;
+            }
+
+            if (commits) {
+              description += `## Commits\n${commits}\n\n`;
+            }
+
+            description += `## Linked Issue\n**#${issueNumber}** — ${issueTitle}\n\n`;
 
             // Get changed files summary
             try {
