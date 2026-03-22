@@ -1,13 +1,16 @@
 name: Weekly Improvement Suggestions
 
-# Runs weekly to analyze the repo and draft improvement/bug fix issues.
-# Drafted issues are created with the "suggestion" label and remain
-# unpublished until the "approved-for-publish" label is manually applied.
+# Runs weekly to analyze the repo and create suggestion issues.
+# Issues are created with the "suggestion" label for review.
 on:
   schedule:
     # Runs every Monday at 9:00 AM UTC
     - cron: "0 9 * * 1"
   workflow_dispatch: # Allow manual trigger for testing
+
+concurrency:
+  group: improvement-suggestions
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -21,8 +24,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -102,16 +103,17 @@ jobs:
               console.log("⚠️ Could not scan for TODOs:", e.message);
             }
 
+            // Fetch all existing suggestion issues once for duplicate checking
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: "suggestion",
+              state: "open",
+              per_page: 100,
+            });
+
             // Create issues for each suggestion
             for (const suggestion of suggestions) {
-              // Check if a similar issue already exists
-              const { data: existing } = await github.rest.issues.listForRepo({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: "suggestion",
-                state: "open",
-              });
-
               const alreadyExists = existing.some((issue) =>
                 issue.title === suggestion.title
               );
