@@ -1,0 +1,30 @@
+name: Auto-assign Issues
+
+# Automatically assigns new issues to the repo owner when the author is the owner.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  assign:
+    name: Auto-assign to Owner
+    runs-on: ubuntu-latest
+
+    # Only assign if the issue author is the repo owner
+    if: github.event.issue.user.login == github.repository_owner
+
+    steps:
+      - name: Assign issue to author
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              assignees: [context.payload.issue.user.login],
+            });
+            console.log("Issue #" + context.payload.issue.number + " assigned to " + context.payload.issue.user.login);
