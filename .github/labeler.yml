@@ -1,0 +1,46 @@
+# Label rules for actions/labeler
+# Labels are applied to PRs based on changed file paths.
+
+setup:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "package-lock.json"
+          - "tsconfig.json"
+          - "postcss.config.mjs"
+          - "components.json"
+          - ".prettierrc.mjs"
+          - "eslint.config.mjs"
+          - "commitlint.config.mjs"
+          - ".husky/**"
+
+ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/labeler.yml"
+          - ".github/pull_request_template.md"
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/app/**"
+          - "src/components/**"
+          - "src/styles/**"
+          - "src/hooks/**"
+          - "public/**"
+
+cms:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/app/api/**"
+          - "src/lib/**"
+          - "prisma/**"
+
+automation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/improvement-suggestions.yml"
+          - ".github/workflows/labeler.yml"
+          - ".github/workflows/create-branch.yml"
+          - ".github/workflows/pr-autofill.yml"

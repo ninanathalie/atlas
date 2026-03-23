@@ -1,0 +1,26 @@
+name: PR Labeler
+
+# Automatically labels PRs based on changed file paths.
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Label PR
+    runs-on: ubuntu-latest
+
+    # Skip forked PRs — GITHUB_TOKEN is read-only for forks
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Apply labels
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
