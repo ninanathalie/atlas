@@ -19,7 +19,6 @@ ci-cd:
       - any-glob-to-any-file:
           - ".github/workflows/**"
           - ".github/labeler.yml"
-          - ".github/pull_request_template.md"
 
 frontend:
   - changed-files:
