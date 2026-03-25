@@ -21,6 +21,8 @@ next-env.d.ts
 # =============================================================================
 # Environment variables
 # =============================================================================
+# Contains secrets (database URLs, API keys) — never commit
+# Use .env.example as a template for required variables
 .env
 .env.*
 !.env.example
@@ -39,6 +41,7 @@ next-env.d.ts
 # =============================================================================
 # Prisma
 # =============================================================================
+# Auto-generated client — regenerate with `npx prisma generate`
 /src/generated/prisma
 
 # =============================================================================
