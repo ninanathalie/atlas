@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, jsonError } from "@/lib/api-utils";
+import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 import { postSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
@@ -27,18 +27,26 @@ export async function PUT(request: Request, { params }: Params) {
   const parsed = postSchema.partial().safeParse(body);
   if (!parsed.success) return jsonError("Validation failed", 400);
 
+  const data = { ...parsed.data } as Record<string, unknown>;
+  if ("scheduledAt" in parsed.data) {
+   data.scheduledAt =
+    parsed.data.scheduledAt === null
+     ? null
+     : parsed.data.scheduledAt
+       ? new Date(parsed.data.scheduledAt)
+       : undefined;
+  }
+
   const post = await prisma.blogPost.update({
    where: { id },
-   data: {
-    ...parsed.data,
-    scheduledAt: parsed.data.scheduledAt ? new Date(parsed.data.scheduledAt) : undefined,
-   },
+   data,
   });
 
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
   return NextResponse.json(post);
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("Post not found", 404);
   return jsonError("Failed to update post", 500);
  }
 }
@@ -53,7 +61,8 @@ export async function DELETE(_request: Request, { params }: Params) {
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("Post not found", 404);
   return jsonError("Failed to delete post", 500);
  }
 }

@@ -5,11 +5,8 @@ import { settingsSchema } from "@/lib/validations";
 
 export async function GET() {
  try {
-  let settings = await prisma.siteSettings.findFirst();
-  if (!settings) {
-   settings = await prisma.siteSettings.create({ data: {} });
-  }
-  return NextResponse.json(settings);
+  const settings = await prisma.siteSettings.findFirst();
+  return NextResponse.json(settings ?? {});
  } catch {
   return jsonError("Failed to fetch settings", 500);
  }

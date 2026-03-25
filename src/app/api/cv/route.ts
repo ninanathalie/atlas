@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, jsonError } from "@/lib/api-utils";
+import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 import { cvSectionSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
@@ -57,7 +57,8 @@ export async function PUT(request: Request) {
 
   revalidatePath("/");
   return NextResponse.json(section);
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("CV section not found", 404);
   return jsonError("Failed to update CV section", 500);
  }
 }
@@ -74,7 +75,8 @@ export async function DELETE(request: NextRequest) {
 
   revalidatePath("/");
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("CV section not found", 404);
   return jsonError("Failed to delete CV section", 500);
  }
 }

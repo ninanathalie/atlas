@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, jsonError } from "@/lib/api-utils";
+import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 import { projectSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
@@ -35,7 +35,8 @@ export async function PUT(request: Request, { params }: Params) {
   revalidatePath("/");
   revalidatePath("/projects");
   return NextResponse.json(project);
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("Project not found", 404);
   return jsonError("Failed to update project", 500);
  }
 }
@@ -50,7 +51,8 @@ export async function DELETE(_request: Request, { params }: Params) {
   revalidatePath("/");
   revalidatePath("/projects");
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("Project not found", 404);
   return jsonError("Failed to delete project", 500);
  }
 }
