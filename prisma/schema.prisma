@@ -52,7 +52,7 @@ model BlogPost {
   contentHtml   String?
   coverImageUrl String?
   category      String?
-  tags          String[]
+  tags          String[]  @default([])
   status        String    @default("draft")
   scheduledAt   DateTime?
   likes         Int       @default(0)
@@ -71,7 +71,7 @@ model Project {
   title       String
   slug        String   @unique
   description String?
-  techStack   String[]
+  techStack   String[]  @default([])
   liveUrl     String?
   repoUrl     String?
   imageUrl    String?
