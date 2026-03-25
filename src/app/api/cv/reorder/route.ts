@@ -7,7 +7,7 @@ import { z } from "zod";
 const reorderSchema = z.array(
  z.object({
   id: z.string(),
-  order: z.number(),
+  order: z.number().int(),
  })
 );
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, jsonError } from "@/lib/api-utils";
+import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 
 export async function GET() {
  try {
@@ -53,7 +53,8 @@ export async function PATCH(request: NextRequest) {
   ]);
 
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("CV document not found", 404);
   return jsonError("Failed to toggle CV document status", 500);
  }
 }
@@ -69,7 +70,8 @@ export async function DELETE(request: NextRequest) {
   await prisma.cVDocument.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("CV document not found", 404);
   return jsonError("Failed to delete CV document", 500);
  }
 }

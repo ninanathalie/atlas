@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, jsonError } from "@/lib/api-utils";
+import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 import { createUserSchema } from "@/lib/validations";
 
 export async function GET() {
@@ -64,7 +64,8 @@ export async function DELETE(request: NextRequest) {
   await prisma.user.delete({ where: { id } });
 
   return NextResponse.json({ success: true });
- } catch {
+ } catch (e) {
+  if (isNotFoundError(e)) return jsonError("User not found", 404);
   return jsonError("Failed to delete user", 500);
  }
 }
