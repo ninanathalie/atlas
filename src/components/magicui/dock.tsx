@@ -46,7 +46,7 @@ function Dock({
  return (
   <DockContext.Provider value={{ mouseX, magnification, distance, baseSize }}>
    <motion.div
-    onMouseMove={(e) => mouseX.set(e.pageX)}
+    onMouseMove={(e) => mouseX.set(e.clientX)}
     onMouseLeave={() => mouseX.set(Infinity)}
     className={cn(
      "mx-auto w-max h-full flex justify-center overflow-visible rounded-full border",

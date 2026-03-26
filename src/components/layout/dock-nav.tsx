@@ -16,6 +16,7 @@ import { Dock, DockIcon } from "@/components/magicui/dock";
 import { AdminDockItems } from "@/components/shared/admin-dock-items";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DOCK_TOOLTIP_CLASS, DOCK_ICON_CLASS } from "@/components/layout/dock-styles";
 
 interface NavItem {
  href: string;
@@ -37,14 +38,8 @@ interface DockNavProps {
  pageVisibility?: { showBlog: boolean; showProjects: boolean };
 }
 
-const tooltipClass =
- "rounded-xl bg-neutral-900 text-neutral-50 dark:bg-neutral-50 dark:text-neutral-900 px-4 py-2 text-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]";
-
-const dockIconClass =
- "rounded-3xl cursor-pointer size-full bg-white dark:bg-neutral-900 p-0 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 backdrop-blur-3xl border border-neutral-200 dark:border-neutral-800 transition-colors";
-
 export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: DockNavProps) {
- const { theme, setTheme } = useTheme();
+ const { resolvedTheme, setTheme } = useTheme();
 
  const allNavItems: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
@@ -95,12 +90,12 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
          target={item.external ? "_blank" : undefined}
          rel={item.external ? "noopener noreferrer" : undefined}
         >
-         <DockIcon className={dockIconClass}>
+         <DockIcon className={DOCK_ICON_CLASS}>
           <item.icon className="size-full" />
          </DockIcon>
         </Link>
        </TooltipTrigger>
-       <TooltipContent side="bottom" sideOffset={8} className={tooltipClass}>
+       <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
         <p>{item.label}</p>
        </TooltipContent>
       </Tooltip>
@@ -116,12 +111,12 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
         <Tooltip key={item.label}>
          <TooltipTrigger>
           <a href={item.href} target="_blank" rel="noopener noreferrer">
-           <DockIcon className={dockIconClass}>
+           <DockIcon className={DOCK_ICON_CLASS}>
             <item.icon className="size-full" />
            </DockIcon>
           </a>
          </TooltipTrigger>
-         <TooltipContent side="bottom" sideOffset={8} className={tooltipClass}>
+         <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
           <p>{item.label}</p>
          </TooltipContent>
         </Tooltip>
@@ -137,15 +132,15 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
       <TooltipTrigger>
        <button
         type="button"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         aria-label="Toggle theme"
        >
-        <DockIcon className={dockIconClass}>
-         {theme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
+        <DockIcon className={DOCK_ICON_CLASS}>
+         {resolvedTheme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
         </DockIcon>
        </button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={8} className={tooltipClass}>
+      <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
        <p>Theme</p>
       </TooltipContent>
      </Tooltip>
