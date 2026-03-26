@@ -11,7 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
  const [session, settings] = await Promise.all([
   getServerSession(authOptions),
-  prisma.siteSettings.findFirst(),
+  prisma.siteSettings.findFirst({
+   select: { maintenanceMode: true },
+  }),
  ]);
 
  // Single-owner portfolio — any authenticated user is the admin
@@ -25,7 +27,7 @@ export default async function PublicLayout({ children }: { children: React.React
    <DrawerStateProvider>
     <div className="relative min-h-screen overflow-x-clip">
      {/* Flickering grid background — fades downward */}
-     <div className="absolute inset-0 top-0 left-0 right-0 h-25 overflow-hidden z-0 pointer-events-none">
+     <div className="absolute inset-x-0 top-0 h-24 overflow-hidden z-0 pointer-events-none">
       <FlickeringGrid
        className="h-full w-full"
        squareSize={2}
