@@ -39,7 +39,8 @@ function LoginForm() {
   if (result?.error) {
    setError("Invalid email or password");
   } else {
-   router.push(callbackUrl);
+   const targetUrl = result?.url || "/";
+   router.push(targetUrl);
    router.refresh();
   }
  }

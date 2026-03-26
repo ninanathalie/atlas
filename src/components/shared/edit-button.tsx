@@ -17,6 +17,7 @@ export function EditButton({ onClick, className }: EditButtonProps) {
     size="icon"
     onClick={onClick}
     className={`h-8 w-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 ${className ?? ""}`}
+    aria-label="Edit"
    >
     <Pencil className="h-4 w-4" />
    </Button>
