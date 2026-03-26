@@ -10,11 +10,21 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
- const [session, settings, user, activeCV] = await Promise.all([
+ const [session, settings] = await Promise.all([
   getServerSession(authOptions),
   prisma.siteSettings.findFirst({
    select: { maintenanceMode: true, showBlog: true, showProjects: true },
   }),
+ ]);
+
+ // Single-owner portfolio — any authenticated user is the admin
+ const isAdmin = !!session;
+ const inMaintenance = !isAdmin && (settings?.maintenanceMode ?? false);
+
+ if (inMaintenance) return <MaintenanceScreen />;
+
+ // Only fetch dock data after maintenance check passes
+ const [user, activeCV] = await Promise.all([
   prisma.user.findFirst({
    orderBy: { createdAt: "asc" },
    select: { socialLinks: true },
@@ -24,12 +34,6 @@ export default async function PublicLayout({ children }: { children: React.React
    select: { id: true },
   }),
  ]);
-
- // Single-owner portfolio — any authenticated user is the admin
- const isAdmin = !!session;
- const inMaintenance = !isAdmin && (settings?.maintenanceMode ?? false);
-
- if (inMaintenance) return <MaintenanceScreen />;
 
  const socialLinks = user?.socialLinks as Record<string, string> | null;
 
