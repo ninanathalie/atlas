@@ -39,6 +39,8 @@ export function DrawerStateProvider({ children }: { children: React.ReactNode })
  }, []);
 
  return (
-  <DrawerStateContext value={{ open, openDrawer, closeDrawer }}>{children}</DrawerStateContext>
+  <DrawerStateContext.Provider value={{ open, openDrawer, closeDrawer }}>
+   {children}
+  </DrawerStateContext.Provider>
  );
 }

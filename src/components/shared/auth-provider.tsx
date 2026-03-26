@@ -22,7 +22,7 @@ export function AuthProvider({
 }) {
  return (
   <SessionProvider>
-   <AuthContext value={{ isAdmin }}>{children}</AuthContext>
+   <AuthContext.Provider value={{ isAdmin }}>{children}</AuthContext.Provider>
   </SessionProvider>
  );
 }
