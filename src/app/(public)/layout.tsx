@@ -4,15 +4,24 @@ import { AuthProvider } from "@/components/shared/auth-provider";
 import { DrawerStateProvider } from "@/components/shared/drawer-state-provider";
 import { FlickeringGrid } from "@/components/shared/flickering-grid";
 import { MaintenanceScreen } from "@/components/shared/maintenance-screen";
+import { DockNav } from "@/components/layout/dock-nav";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
- const [session, settings] = await Promise.all([
+ const [session, settings, user, activeCV] = await Promise.all([
   getServerSession(authOptions),
   prisma.siteSettings.findFirst({
-   select: { maintenanceMode: true },
+   select: { maintenanceMode: true, showBlog: true, showProjects: true },
+  }),
+  prisma.user.findFirst({
+   orderBy: { createdAt: "asc" },
+   select: { socialLinks: true },
+  }),
+  prisma.cVDocument.findFirst({
+   where: { isActive: true },
+   select: { id: true },
   }),
  ]);
 
@@ -21,6 +30,8 @@ export default async function PublicLayout({ children }: { children: React.React
  const inMaintenance = !isAdmin && (settings?.maintenanceMode ?? false);
 
  if (inMaintenance) return <MaintenanceScreen />;
+
+ const socialLinks = user?.socialLinks as Record<string, string> | null;
 
  return (
   <AuthProvider isAdmin={isAdmin}>
@@ -38,7 +49,20 @@ export default async function PublicLayout({ children }: { children: React.React
        }}
       />
      </div>
-     <div className="relative z-10">{children}</div>
+
+     {/* Floating dock navigation — top center */}
+     <DockNav
+      socialLinks={socialLinks}
+      hasActiveCV={!!activeCV}
+      isAdmin={isAdmin}
+      pageVisibility={{
+       showBlog: settings?.showBlog ?? true,
+       showProjects: settings?.showProjects ?? true,
+      }}
+     />
+
+     {/* Page content — offset for dock */}
+     <div className="relative z-10 pt-20">{children}</div>
     </div>
    </DrawerStateProvider>
   </AuthProvider>
