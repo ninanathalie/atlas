@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+const DEFAULT_COLORS = ["#0DFFF7", "#0BC5BF"];
+
 interface FlickeringGridProps {
  className?: string;
  squareSize?: number;
@@ -18,7 +20,7 @@ export function FlickeringGrid({
  gridGap = 7,
  flickerChance = 0.025,
  maxOpacity = 0.12,
- colors = ["#6AFF5E", "#0DFFF7"],
+ colors = DEFAULT_COLORS,
  style,
 }: FlickeringGridProps) {
  const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -36,10 +38,13 @@ export function FlickeringGrid({
   let animId: number;
 
   const init = () => {
-   canvas.width = canvas.offsetWidth;
-   canvas.height = canvas.offsetHeight;
-   cols = Math.ceil(canvas.width / (squareSize + gridGap));
-   rows = Math.ceil(canvas.height / (squareSize + gridGap));
+   const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+   const rect = canvas.getBoundingClientRect();
+   canvas.width = rect.width * dpr;
+   canvas.height = rect.height * dpr;
+   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+   cols = Math.ceil(rect.width / (squareSize + gridGap));
+   rows = Math.ceil(rect.height / (squareSize + gridGap));
    const total = cols * rows;
    opacities.length = 0;
    colorIndices.length = 0;
@@ -82,5 +87,13 @@ export function FlickeringGrid({
   };
  }, [squareSize, gridGap, flickerChance, maxOpacity, colors]);
 
- return <canvas ref={canvasRef} className={`block ${className}`} style={style} />;
+ return (
+  <canvas
+   ref={canvasRef}
+   className={`block ${className}`}
+   style={style}
+   aria-hidden="true"
+   role="presentation"
+  />
+ );
 }
