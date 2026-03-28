@@ -19,12 +19,10 @@ export function AdminDockItems() {
    />
 
    <Tooltip>
-    <TooltipTrigger>
-     <button type="button" onClick={() => openDrawer("settings")} aria-label="Settings">
-      <DockIcon className={DOCK_ICON_CLASS}>
-       <Settings className="size-full" />
-      </DockIcon>
-     </button>
+    <TooltipTrigger onClick={() => openDrawer("settings")} aria-label="Settings">
+     <DockIcon className={DOCK_ICON_CLASS}>
+      <Settings className="size-full" />
+     </DockIcon>
     </TooltipTrigger>
     <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
      <p>Settings</p>
@@ -32,12 +30,10 @@ export function AdminDockItems() {
    </Tooltip>
 
    <Tooltip>
-    <TooltipTrigger>
-     <button type="button" onClick={() => signOut({ callbackUrl: "/" })} aria-label="Sign out">
-      <DockIcon className={DOCK_ICON_CLASS}>
-       <LogOut className="size-full" />
-      </DockIcon>
-     </button>
+    <TooltipTrigger onClick={() => signOut({ callbackUrl: "/" })} aria-label="Sign out">
+     <DockIcon className={DOCK_ICON_CLASS}>
+      <LogOut className="size-full" />
+     </DockIcon>
     </TooltipTrigger>
     <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
      <p>Sign out</p>
