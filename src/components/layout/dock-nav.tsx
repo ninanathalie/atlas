@@ -129,16 +129,13 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
       className="h-2/3 m-auto w-px bg-neutral-200 dark:bg-neutral-800"
      />
      <Tooltip>
-      <TooltipTrigger>
-       <button
-        type="button"
-        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        aria-label="Toggle theme"
-       >
-        <DockIcon className={DOCK_ICON_CLASS}>
-         {resolvedTheme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
-        </DockIcon>
-       </button>
+      <TooltipTrigger
+       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+       aria-label="Toggle theme"
+      >
+       <DockIcon className={DOCK_ICON_CLASS}>
+        {resolvedTheme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
+       </DockIcon>
       </TooltipTrigger>
       <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
        <p>Theme</p>
