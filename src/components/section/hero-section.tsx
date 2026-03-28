@@ -41,13 +41,13 @@ export function HeroSection({
       <div className="flex items-center gap-2">
        <h1 className="text-3xl font-semibold tracking-tighter sm:text-4xl lg:text-5xl">
         Hi, I&apos;m{" "}
-        <span className="bg-gradient-to-r from-[#0DFFF7] to-[#0BC5BF] bg-clip-text text-transparent">
+        <span className="bg-linear-to-r from-[#0DFFF7] to-[#0BC5BF] bg-clip-text text-transparent">
          {name}
         </span>
        </h1>
        <EditButton onClick={() => openDrawer("profile")} />
       </div>
-      <p className="max-w-[600px] text-neutral-500 dark:text-neutral-400 md:text-lg lg:text-xl">
+      <p className="max-w-150 text-neutral-500 dark:text-neutral-400 md:text-lg lg:text-xl">
        {title}
       </p>
      </div>
@@ -55,7 +55,7 @@ export function HeroSection({
      {/* Avatar — on top for mobile, right for desktop */}
      <div className="order-1 md:order-2">
       <Avatar className="size-24 border shadow-lg ring-4 ring-neutral-200 dark:ring-neutral-800 md:size-32">
-       <AvatarImage alt={name} src={profileImage ?? ""} />
+       <AvatarImage alt={name} src={profileImage ?? undefined} />
        <AvatarFallback className="text-lg font-semibold">{initials}</AvatarFallback>
       </Avatar>
      </div>
@@ -69,7 +69,7 @@ export function HeroSection({
       <h2 className="text-xl font-bold">About</h2>
       <EditButton onClick={() => openDrawer("profile")} />
      </div>
-     <div className="prose max-w-full text-pretty leading-relaxed text-neutral-600 dark:text-neutral-300 text-center md:text-left">
+     <div className="max-w-full text-pretty leading-relaxed text-neutral-600 dark:text-neutral-300 text-center md:text-left">
       <p>{bio}</p>
      </div>
     </div>
@@ -106,7 +106,7 @@ export function HeroSection({
      )}
      {hasActiveCV && (
       <Link
-       href="/api/cv/pdf"
+       href="/api/cv"
        target="_blank"
        rel="noopener noreferrer"
        className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
