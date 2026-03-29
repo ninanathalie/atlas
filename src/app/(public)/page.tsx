@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { HeroSection } from "@/components/section/hero-section";
+import { WorkSection } from "@/components/section/work-section";
+import { ExperienceEditButton } from "@/components/shared/homepage-edit-buttons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
- const [user, activeCV] = await Promise.all([
+ const [user, activeCV, cvSections] = await Promise.all([
   prisma.user.findFirst({
    orderBy: { createdAt: "asc" },
    select: {
@@ -30,7 +32,12 @@ export default async function HomePage() {
    where: { isActive: true },
    select: { id: true },
   }),
+  prisma.cVSection.findMany({
+   orderBy: [{ type: "asc" }, { order: "asc" }],
+  }),
  ]);
+
+ const experienceItems = cvSections.filter((s) => s.type === "experience");
 
  if (!user) {
   return (
@@ -58,6 +65,18 @@ export default async function HomePage() {
     socialLinks={socialLinks}
     hasActiveCV={!!activeCV}
    />
+
+   {experienceItems.length > 0 && (
+    <section id="work" className="group">
+     <div className="flex min-h-0 flex-col gap-y-4">
+      <div className="flex items-center gap-2">
+       <h2 className="text-xl font-bold">Work Experience</h2>
+       <ExperienceEditButton />
+      </div>
+      <WorkSection items={experienceItems} />
+     </div>
+    </section>
+   )}
   </main>
  );
 }
