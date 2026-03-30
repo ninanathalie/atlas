@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import {
@@ -40,6 +41,11 @@ interface DockNavProps {
 
 export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: DockNavProps) {
  const { resolvedTheme, setTheme } = useTheme();
+ const mounted = useSyncExternalStore(
+  () => () => {},
+  () => true,
+  () => false
+ );
 
  const allNavItems: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
@@ -128,19 +134,21 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
       orientation="vertical"
       className="h-2/3 m-auto w-px bg-neutral-200 dark:bg-neutral-800"
      />
-     <Tooltip>
-      <TooltipTrigger
-       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-       aria-label="Toggle theme"
-      >
-       <DockIcon className={DOCK_ICON_CLASS}>
-        {resolvedTheme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
-       </DockIcon>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
-       <p>Theme</p>
-      </TooltipContent>
-     </Tooltip>
+     {mounted && (
+      <Tooltip>
+       <TooltipTrigger
+        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+        aria-label="Toggle theme"
+       >
+        <DockIcon className={DOCK_ICON_CLASS}>
+         {resolvedTheme === "dark" ? <Sun className="size-full" /> : <Moon className="size-full" />}
+        </DockIcon>
+       </TooltipTrigger>
+       <TooltipContent side="bottom" sideOffset={8} className={DOCK_TOOLTIP_CLASS}>
+        <p>Theme</p>
+       </TooltipContent>
+      </Tooltip>
+     )}
 
      {isAdmin && <AdminDockItems />}
     </Dock>
