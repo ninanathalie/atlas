@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { HeroSection } from "@/components/section/hero-section";
 import { WorkSection } from "@/components/section/work-section";
-import { ExperienceEditButton } from "@/components/shared/homepage-edit-buttons";
+import { SkillsSection } from "@/components/section/skills-section";
+import { ExperienceEditButton, SkillEditButton } from "@/components/shared/homepage-edit-buttons";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,7 @@ export default async function HomePage() {
  ]);
 
  const experienceItems = cvSections.filter((s) => s.type === "experience");
+ const skillItems = cvSections.filter((s) => s.type === "skill");
 
  if (!user) {
   return (
@@ -74,6 +76,18 @@ export default async function HomePage() {
        <ExperienceEditButton />
       </div>
       <WorkSection items={experienceItems} />
+     </div>
+    </section>
+   )}
+
+   {skillItems.length > 0 && (
+    <section id="skills" className="group">
+     <div className="flex min-h-0 flex-col gap-y-4">
+      <div className="flex items-center gap-2">
+       <h2 className="text-xl font-bold">Skills</h2>
+       <SkillEditButton />
+      </div>
+      <SkillsSection items={skillItems} />
      </div>
     </section>
    )}
