@@ -43,6 +43,8 @@ next-env.d.ts
 # =============================================================================
 # Auto-generated client — regenerate with `npx prisma generate`
 /src/generated/prisma
+# Local seed data — contains personal info, not committed
+prisma/seed-data.json
 
 # =============================================================================
 # Linting & Formatting cache
