@@ -37,8 +37,10 @@ async function main() {
   ...data.education.map((e: Record<string, unknown>) => ({ ...e, type: "education" })),
  ];
 
- await prisma.cVSection.deleteMany();
- await prisma.cVSection.createMany({ data: sections });
+ await prisma.$transaction([
+  prisma.cVSection.deleteMany(),
+  prisma.cVSection.createMany({ data: sections }),
+ ]);
  console.log(
   "Seeded:",
   data.experiences.length,
@@ -54,6 +56,12 @@ async function main() {
  if (!existing) {
   await prisma.siteSettings.create({ data: data.siteSettings });
   console.log("Site settings created.");
+ } else {
+  await prisma.siteSettings.update({
+   where: { id: existing.id },
+   data: data.siteSettings,
+  });
+  console.log("Site settings updated.");
  }
 }
 
