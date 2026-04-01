@@ -3,6 +3,8 @@ import { HeroSection } from "@/components/section/hero-section";
 import { WorkSection } from "@/components/section/work-section";
 import { SkillsSection } from "@/components/section/skills-section";
 import { EducationSection } from "@/components/section/education-section";
+import { ProjectsSection } from "@/components/section/projects-section";
+import Link from "next/link";
 import {
  ExperienceEditButton,
  SkillEditButton,
@@ -23,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
- const [user, activeCV, cvSections] = await Promise.all([
+ const [user, activeCV, cvSections, projects] = await Promise.all([
   prisma.user.findFirst({
    orderBy: { createdAt: "asc" },
    select: {
@@ -40,6 +42,9 @@ export default async function HomePage() {
   }),
   prisma.cVSection.findMany({
    orderBy: [{ type: "asc" }, { order: "asc" }],
+  }),
+  prisma.project.findMany({
+   orderBy: [{ featured: "desc" }, { order: "asc" }],
   }),
  ]);
 
@@ -106,6 +111,25 @@ export default async function HomePage() {
        <EducationEditButton />
       </div>
       <EducationSection items={educationItems} />
+     </div>
+    </section>
+   )}
+
+   {projects.length > 0 && (
+    <section id="projects" className="group">
+     <div className="flex min-h-0 flex-col gap-y-4">
+      <div className="flex items-center justify-between">
+       <h2 className="text-xl font-bold">Projects</h2>
+       {projects.length > 4 && (
+        <Link
+         href="/projects"
+         className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+        >
+         View all →
+        </Link>
+       )}
+      </div>
+      <ProjectsSection items={projects} />
      </div>
     </section>
    )}
