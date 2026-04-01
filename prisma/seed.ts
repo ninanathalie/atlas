@@ -51,6 +51,15 @@ async function main() {
   "education"
  );
 
+ // ── Projects ──
+ if (data.projects && data.projects.length > 0) {
+  await prisma.$transaction([
+   prisma.project.deleteMany(),
+   prisma.project.createMany({ data: data.projects }),
+  ]);
+  console.log("Seeded:", data.projects.length, "projects");
+ }
+
  // ── Site Settings ──
  const existing = await prisma.siteSettings.findFirst();
  if (!existing) {
