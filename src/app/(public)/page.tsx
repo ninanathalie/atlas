@@ -4,6 +4,7 @@ import { WorkSection } from "@/components/section/work-section";
 import { SkillsSection } from "@/components/section/skills-section";
 import { EducationSection } from "@/components/section/education-section";
 import { ProjectsSection } from "@/components/section/projects-section";
+import { BlogSection } from "@/components/section/blog-section";
 import Link from "next/link";
 import {
  ExperienceEditButton,
@@ -25,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
- const [user, activeCV, cvSections, projects] = await Promise.all([
+ const [user, activeCV, cvSections, projects, recentPosts] = await Promise.all([
   prisma.user.findFirst({
    orderBy: { createdAt: "asc" },
    select: {
@@ -46,6 +47,20 @@ export default async function HomePage() {
   prisma.project.findMany({
    orderBy: [{ featured: "desc" }, { order: "asc" }],
    take: 5,
+  }),
+  prisma.blogPost.findMany({
+   where: { status: "published" },
+   orderBy: { publishedAt: "desc" },
+   take: 4,
+   select: {
+    id: true,
+    title: true,
+    slug: true,
+    excerpt: true,
+    category: true,
+    publishedAt: true,
+    readTimeMin: true,
+   },
   }),
  ]);
 
@@ -131,6 +146,23 @@ export default async function HomePage() {
        )}
       </div>
       <ProjectsSection items={projects} />
+     </div>
+    </section>
+   )}
+
+   {recentPosts.length > 0 && (
+    <section id="blog" className="group">
+     <div className="flex min-h-0 flex-col gap-y-4">
+      <div className="flex items-center justify-between">
+       <h2 className="text-xl font-bold">Blog</h2>
+       <Link
+        href="/blog"
+        className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+       >
+        View all →
+       </Link>
+      </div>
+      <BlogSection posts={recentPosts} />
      </div>
     </section>
    )}
