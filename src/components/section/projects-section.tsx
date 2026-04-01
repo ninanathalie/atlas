@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, GithubIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { isSafeUrl } from "@/lib/utils";
 
 interface ProjectItem {
  id: string;
@@ -45,9 +46,9 @@ function ProjectCard({ project }: { project: ProjectItem }) {
 
    {project.techStack.length > 0 && (
     <div className="flex flex-wrap gap-1">
-     {project.techStack.map((tech) => (
+     {project.techStack.map((tech, index) => (
       <Badge
-       key={tech}
+       key={`${tech}-${index}`}
        variant="secondary"
        className="text-[10px] px-1.5 py-0 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700"
       >
@@ -58,7 +59,7 @@ function ProjectCard({ project }: { project: ProjectItem }) {
    )}
 
    <div className="flex items-center gap-3">
-    {project.liveUrl && (
+    {project.liveUrl && isSafeUrl(project.liveUrl) && (
      <Link
       href={project.liveUrl}
       target="_blank"
@@ -69,7 +70,7 @@ function ProjectCard({ project }: { project: ProjectItem }) {
       Live
      </Link>
     )}
-    {project.repoUrl && (
+    {project.repoUrl && isSafeUrl(project.repoUrl) && (
      <Link
       href={project.repoUrl}
       target="_blank"
