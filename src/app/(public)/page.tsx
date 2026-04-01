@@ -45,6 +45,7 @@ export default async function HomePage() {
   }),
   prisma.project.findMany({
    orderBy: [{ featured: "desc" }, { order: "asc" }],
+   take: 5,
   }),
  ]);
 
