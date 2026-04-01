@@ -19,6 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProjectsPage() {
  const projects = await prisma.project.findMany({
   orderBy: [{ featured: "desc" }, { order: "asc" }],
+  select: {
+   id: true,
+   title: true,
+   slug: true,
+   description: true,
+   techStack: true,
+   liveUrl: true,
+   repoUrl: true,
+   imageUrl: true,
+  },
  });
 
  return (
