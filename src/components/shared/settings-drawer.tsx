@@ -79,29 +79,38 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
  const [loadError, setLoadError] = useState(false);
 
  useEffect(() => {
-  if (open && !loaded) {
-   setLoadError(false);
-   fetch("/api/settings")
-    .then((r) => {
-     if (!r.ok) throw new Error();
-     return r.json();
-    })
-    .then((s) => {
-     setSettings(s ?? {});
-     setLoaded(true);
-    })
-    .catch(() => {
-     setLoadError(true);
-     toast.error("Failed to load settings.");
-    });
-  }
   if (!open) {
    setLoaded(false);
    setLoadError(false);
+   return;
   }
+
+  if (loaded) return;
+
+  const controller = new AbortController();
+
+  setLoadError(false);
+  fetch("/api/settings", { signal: controller.signal })
+   .then((r) => {
+    if (!r.ok) throw new Error();
+    return r.json();
+   })
+   .then((s) => {
+    setSettings(s ?? {});
+    setLoaded(true);
+   })
+   .catch((err) => {
+    if (err instanceof DOMException && err.name === "AbortError") return;
+    setLoadError(true);
+    toast.error("Failed to load settings.");
+   });
+
+  return () => {
+   controller.abort();
+  };
  }, [open, loaded]);
 
- function set(key: string, value: unknown) {
+ function set<K extends keyof SiteSettingsData>(key: K, value: SiteSettingsData[K]) {
   markDirty();
   setSettings((prev) => ({ ...prev, [key]: value }));
  }
@@ -253,25 +262,29 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
          Jump to other admin sections.
         </p>
        </div>
-       {managementItems.map(({ label, description, icon: Icon, drawer }) => (
-        <button
-         key={drawer}
-         type="button"
-         className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 px-4 py-3 text-left cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900"
-         onClick={() => openDrawer(drawer)}
-        >
-         <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800">
-          <Icon className="size-4 text-neutral-500 dark:text-neutral-400" />
-         </div>
-         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">{label}</p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-snug">
-           {description}
-          </p>
-         </div>
-         <ChevronRight className="size-4 text-neutral-500 dark:text-neutral-400 shrink-0" />
-        </button>
-       ))}
+       {managementItems.map(({ label, description, icon: Icon, drawer }) => {
+        const isAvailable = drawer === "settings";
+        return (
+         <button
+          key={drawer}
+          type="button"
+          disabled={!isAvailable}
+          className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 px-4 py-3 text-left cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => openDrawer(drawer)}
+         >
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800">
+           <Icon className="size-4 text-neutral-500 dark:text-neutral-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+           <p className="text-sm font-medium">{label}</p>
+           <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-snug">
+            {description}
+           </p>
+          </div>
+          <ChevronRight className="size-4 text-neutral-500 dark:text-neutral-400 shrink-0" />
+         </button>
+        );
+       })}
       </div>
      </div>
     </ScrollArea>

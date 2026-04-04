@@ -28,7 +28,7 @@ export function UnsavedChangesDialog({ open, onConfirm, onCancel }: UnsavedChang
      </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
-     <AlertDialogCancel onClick={onCancel}>Keep editing</AlertDialogCancel>
+     <AlertDialogCancel>Keep editing</AlertDialogCancel>
      <AlertDialogAction onClick={onConfirm}>Discard changes</AlertDialogAction>
     </AlertDialogFooter>
    </AlertDialogContent>
