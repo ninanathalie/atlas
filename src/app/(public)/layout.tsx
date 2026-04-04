@@ -5,7 +5,9 @@ import { DrawerStateProvider } from "@/components/shared/drawer-state-provider";
 import { FlickeringGrid } from "@/components/shared/flickering-grid";
 import { MaintenanceScreen } from "@/components/shared/maintenance-screen";
 import { DockNav } from "@/components/layout/dock-nav";
+import { GlobalDrawers } from "@/components/shared/global-drawers";
 import { prisma } from "@/lib/prisma";
+import { Toaster } from "sonner";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +69,10 @@ export default async function PublicLayout({ children }: { children: React.React
 
      {/* Page content — offset for dock */}
      <div className="relative z-10 pt-20">{children}</div>
+
+     {/* Admin drawers */}
+     <GlobalDrawers />
+     <Toaster position="bottom-right" />
     </div>
    </DrawerStateProvider>
   </AuthProvider>
