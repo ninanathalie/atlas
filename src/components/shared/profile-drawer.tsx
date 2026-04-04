@@ -45,6 +45,7 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   if (!open) {
    setLoaded(false);
    setLoadError(false);
+   setProfile(null);
    return;
   }
 
@@ -74,14 +75,17 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
  }, [open, loaded]);
 
  function setP<K extends keyof Profile>(key: K, value: Profile[K]) {
-  markDirty();
-  setProfile((prev) => (prev ? { ...prev, [key]: value } : prev));
+  setProfile((prev) => {
+   if (!prev) return prev;
+   markDirty();
+   return { ...prev, [key]: value };
+  });
  }
 
  function setSocial(key: string, value: string) {
-  markDirty();
   setProfile((prev) => {
    if (!prev) return prev;
+   markDirty();
    return { ...prev, socialLinks: { ...(prev.socialLinks ?? {}), [key]: value } };
   });
  }
@@ -90,10 +94,19 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
   if (!profile) return;
   setSaving(true);
   try {
+   // Convert nulls to undefined so zod validation passes
+   const payload = {
+    name: profile.name,
+    ...(profile.title !== null && { title: profile.title }),
+    ...(profile.bio !== null && { bio: profile.bio }),
+    ...(profile.profileImage !== null && { profileImage: profile.profileImage }),
+    ...(profile.socialLinks !== null && { socialLinks: profile.socialLinks }),
+   };
+
    await apiFetch("/api/profile", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(profile),
+    body: JSON.stringify(payload),
    });
    toast.success("Profile saved!");
    resetDirty();
@@ -183,7 +196,7 @@ export function ProfileDrawer({ open, onClose }: ProfileDrawerProps) {
     </ScrollArea>
 
     <div className="border-t border-neutral-200 dark:border-neutral-800 px-6 py-4 flex gap-3">
-     <Button onClick={handleSave} disabled={saving || !profile}>
+     <Button onClick={handleSave} disabled={saving || !profile || loadError}>
       {saving ? "Saving..." : "Save Profile"}
      </Button>
      <Button variant="outline" onClick={confirmClose}>
