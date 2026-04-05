@@ -21,9 +21,14 @@ jobs:
         run: |
           BRANCH="${{ github.head_ref }}"
 
-          # Skip validation for base branches
+          # Skip validation for base branches and automated bot branches
           if [[ "$BRANCH" == "develop" || "$BRANCH" == "master" ]]; then
             echo "✅ Base branch '$BRANCH' — skipping validation."
+            exit 0
+          fi
+
+          if [[ "$BRANCH" == dependabot/* ]]; then
+            echo "✅ Dependabot branch '$BRANCH' — skipping validation."
             exit 0
           fi
 
