@@ -48,7 +48,9 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
   setLoading(true);
   try {
    const res = await fetch("/api/cv/documents", { signal });
-   if (res.ok) setDocuments(await res.json());
+   const data = await res.json();
+   if (!res.ok) throw new Error(data.error || "Failed to load documents.");
+   setDocuments(data);
   } catch (err) {
    if (err instanceof DOMException && err.name === "AbortError") return;
    toast.error("Failed to load documents.");
@@ -76,14 +78,11 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
    toast.error("Only PDF files are accepted.");
    return;
   }
+  // TODO: Implement file storage (e.g., Cloudinary/S3) and POST metadata to /api/cv/documents
+  // Current API expects JSON { filename, url, publicId, fileSize }, not FormData
   setUploading(true);
   try {
-   const formData = new FormData();
-   formData.append("file", file);
-   const res = await fetch("/api/cv/documents", { method: "POST", body: formData });
-   if (!res.ok) throw new Error();
-   toast.success("PDF uploaded successfully.");
-   fetchDocuments();
+   toast.error("PDF upload is not available until file storage is configured.");
   } catch {
    toast.error("Upload failed.");
   } finally {
@@ -91,16 +90,16 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
   }
  }
 
- async function handleToggleActive(doc: CVDocument) {
+ async function handleSetActive(doc: CVDocument) {
+  if (doc.isActive) return;
+
   setActivating(doc.id);
   try {
-   const res = await fetch(`/api/cv/documents?id=${doc.id}`, {
+   const res = await fetch(`/api/cv/documents?id=${encodeURIComponent(doc.id)}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ isActive: !doc.isActive }),
    });
    if (!res.ok) throw new Error();
-   toast.success(doc.isActive ? "CV deactivated." : "CV set as active.");
+   toast.success("CV set as active.");
    fetchDocuments();
   } catch {
    toast.error("Failed to update status.");
@@ -112,7 +111,9 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
  async function handleDelete(doc: CVDocument) {
   setDeleting(doc.id);
   try {
-   const res = await fetch(`/api/cv/documents?id=${doc.id}`, { method: "DELETE" });
+   const res = await fetch(`/api/cv/documents?id=${encodeURIComponent(doc.id)}`, {
+    method: "DELETE",
+   });
    if (!res.ok) throw new Error();
    toast.success("Document deleted.");
    setToDelete(null);
@@ -173,7 +174,12 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
           : "border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600"
         } ${uploading ? "pointer-events-none opacity-60" : ""}`}
         onClick={() => fileInputRef.current?.click()}
-        onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+         if (e.key === "Enter" || e.key === " ") {
+          if (e.key === " ") e.preventDefault();
+          fileInputRef.current?.click();
+         }
+        }}
         onDragOver={(e) => {
          e.preventDefault();
          setDragging(true);
@@ -251,7 +257,7 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
              variant="ghost"
              size="icon-xs"
              aria-label="Preview in new tab"
-             onClick={() => window.open(doc.url, "_blank")}
+             onClick={() => window.open(doc.url, "_blank", "noopener,noreferrer")}
             >
              <Eye className="size-3.5" />
             </Button>
@@ -261,7 +267,7 @@ export function CVDocumentsDrawer({ open, onClose }: CVDocumentsDrawerProps) {
              size="icon-xs"
              aria-label={doc.isActive ? "Deactivate" : "Set as active CV"}
              disabled={activating === doc.id}
-             onClick={() => handleToggleActive(doc)}
+             onClick={() => handleSetActive(doc)}
             >
              {activating === doc.id ? (
               <Loader2 className="size-3.5 animate-spin" />
