@@ -1,0 +1,27 @@
+version: 2
+updates:
+ # npm dependencies
+ - package-ecosystem: "npm"
+   directory: "/"
+   target-branch: "develop"
+   schedule:
+    interval: "weekly"
+    day: "monday"
+   open-pull-requests-limit: 10
+   labels:
+    - "automation"
+   commit-message:
+    prefix: "chore(deps)"
+
+ # GitHub Actions
+ - package-ecosystem: "github-actions"
+   directory: "/"
+   target-branch: "develop"
+   schedule:
+    interval: "weekly"
+    day: "monday"
+   open-pull-requests-limit: 5
+   labels:
+    - "ci-cd"
+   commit-message:
+    prefix: "chore(deps)"
