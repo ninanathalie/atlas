@@ -60,6 +60,6 @@
   "prettier": "^3.8.1",
   "prisma": "^7.5.0",
   "tailwindcss": "^4",
-  "typescript": "^5"
+  "typescript": "^6"
  }
 }
