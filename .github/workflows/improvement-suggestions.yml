@@ -41,27 +41,9 @@ jobs:
             const { execSync } = require("child_process");
             const suggestions = [];
 
-            // 1. Check for outdated dependencies
-            try {
-              const outdated = execSync("npm outdated --json 2>/dev/null || true").toString();
-              const parsed = JSON.parse(outdated || "{}");
-              const outdatedCount = Object.keys(parsed).length;
+            // Note: Dependency updates are handled by Dependabot, not this workflow.
 
-              if (outdatedCount > 0) {
-                const deps = Object.entries(parsed)
-                  .map(([name, info]) => `- \`${name}\`: ${info.current} → ${info.latest}`)
-                  .join("\n");
-
-                suggestions.push({
-                  title: `chore(deps): ${outdatedCount} outdated dependencies found`,
-                  body: `## Overview\nThe following dependencies have newer versions available:\n\n${deps}\n\n## Suggested Action\nReview and update dependencies to their latest compatible versions.`,
-                });
-              }
-            } catch (e) {
-              console.log("⚠️ Could not check outdated dependencies:", e.message);
-            }
-
-            // 2. Check for TypeScript errors
+            // 1. Check for TypeScript errors
             try {
               execSync("npx tsc --noEmit 2>&1");
             } catch (e) {
