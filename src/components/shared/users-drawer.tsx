@@ -70,7 +70,7 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
   e.preventDefault();
   setAdding(true);
   try {
-   const res = await apiFetch("/api/users", {
+   const res = (await apiFetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -78,7 +78,7 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
      name,
      ...(password ? { password } : {}),
     }),
-   });
+   })) as Response;
    const user = await res.json();
    setUsers((prev) => [user, ...prev]);
    setEmail("");
