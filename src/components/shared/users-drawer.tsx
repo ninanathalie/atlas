@@ -70,16 +70,14 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
   e.preventDefault();
   setAdding(true);
   try {
-   const res = (await apiFetch("/api/users", {
+   const user = await apiFetch<UserItem>("/api/users", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
      email,
      name,
      ...(password ? { password } : {}),
     }),
-   })) as Response;
-   const user = await res.json();
+   });
    setUsers((prev) => [user, ...prev]);
    setEmail("");
    setName("");
@@ -186,6 +184,7 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
            <Button
             variant="ghost"
             size="icon"
+            aria-label={`Remove ${user.name}`}
             className="shrink-0 text-neutral-400 hover:text-red-500"
             onClick={() => setDeleteUserId(user.id)}
            >
