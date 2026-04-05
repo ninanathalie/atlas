@@ -43,27 +43,17 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
    return;
   }
 
-  const controller = new AbortController();
   setLoading(true);
 
-  fetch("/api/users", { signal: controller.signal })
-   .then((r) => {
-    if (!r.ok) throw new Error();
-    return r.json();
-   })
+  apiFetch<{ users: UserItem[]; currentUserId: string | null }>("/api/users")
    .then((data) => {
     setUsers(data.users);
     setCurrentUserId(data.currentUserId);
    })
    .catch((err) => {
-    if (err instanceof DOMException && err.name === "AbortError") return;
-    toast.error("Failed to load users.");
+    toast.error(err instanceof Error ? err.message : "Failed to load users.");
    })
    .finally(() => setLoading(false));
-
-  return () => {
-   controller.abort();
-  };
  }, [open]);
 
  async function handleAdd(e: React.FormEvent) {
