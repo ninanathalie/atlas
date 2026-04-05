@@ -4,7 +4,7 @@ import { requireAuth, jsonError, isNotFoundError } from "@/lib/api-utils";
 import { createUserSchema } from "@/lib/validations";
 
 export async function GET() {
- const { error } = await requireAuth();
+ const { error, session } = await requireAuth();
  if (error) return error;
 
  try {
@@ -12,7 +12,13 @@ export async function GET() {
    select: { id: true, name: true, email: true, createdAt: true },
    orderBy: { createdAt: "asc" },
   });
-  return NextResponse.json(users);
+
+  const currentUser = await prisma.user.findUnique({
+   where: { email: session.user.email! },
+   select: { id: true },
+  });
+
+  return NextResponse.json({ users, currentUserId: currentUser?.id ?? null });
  } catch {
   return jsonError("Failed to fetch users", 500);
  }

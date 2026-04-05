@@ -263,14 +263,17 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
         </p>
        </div>
        {managementItems.map(({ label, description, icon: Icon, drawer }) => {
-        const isAvailable = drawer === "settings";
+        const isAvailable = drawer === "settings" || drawer === "users";
         return (
          <button
           key={drawer}
           type="button"
           disabled={!isAvailable}
           className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 dark:border-neutral-800 px-4 py-3 text-left cursor-pointer transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => openDrawer(drawer)}
+          onClick={() => {
+           resetDirty();
+           openDrawer(drawer);
+          }}
          >
           <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800">
            <Icon className="size-4 text-neutral-500 dark:text-neutral-400" />
