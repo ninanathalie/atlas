@@ -94,7 +94,7 @@ export function UsersDrawer({ open, onClose }: UsersDrawerProps) {
  async function handleDelete() {
   if (!deleteUserId) return;
   try {
-   await apiFetch(`/api/users?id=${deleteUserId}`, { method: "DELETE" });
+   await apiFetch(`/api/users?id=${encodeURIComponent(deleteUserId)}`, { method: "DELETE" });
    setUsers((prev) => prev.filter((u) => u.id !== deleteUserId));
    toast.success("User removed.");
   } catch (err) {
