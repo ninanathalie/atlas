@@ -13,12 +13,7 @@ export async function GET() {
    orderBy: { createdAt: "asc" },
   });
 
-  const currentUser = await prisma.user.findUnique({
-   where: { email: session.user.email! },
-   select: { id: true },
-  });
-
-  return NextResponse.json({ users, currentUserId: currentUser?.id ?? null });
+  return NextResponse.json({ users, currentUserId: session.user.id ?? null });
  } catch {
   return jsonError("Failed to fetch users", 500);
  }
