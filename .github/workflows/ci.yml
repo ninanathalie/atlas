@@ -36,7 +36,11 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      # 5. TypeScript type check — catches type errors without compiling
+      # 5. Run unit tests
+      - name: Test
+        run: npm test
+
+      # 6. TypeScript type check — catches type errors without compiling
       - name: Type check
         run: npx tsc --noEmit
 
