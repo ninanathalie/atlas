@@ -263,7 +263,8 @@ export function SettingsDrawer({ open, onClose }: SettingsDrawerProps) {
         </p>
        </div>
        {managementItems.map(({ label, description, icon: Icon, drawer }) => {
-        const isAvailable = drawer === "settings" || drawer === "users";
+        const isAvailable =
+         drawer === "settings" || drawer === "users" || drawer === "cv-documents";
         return (
          <button
           key={drawer}
