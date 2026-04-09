@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   ci:
-    name: Type Check, Lint & Build
+    name: Test, Type Check, Lint & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -36,14 +36,18 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      # 5. TypeScript type check — catches type errors without compiling
+      # 5. Run unit tests
+      - name: Test
+        run: npm test
+
+      # 6. TypeScript type check — catches type errors without compiling
       - name: Type check
         run: npx tsc --noEmit
 
-      # 6. ESLint — catches lint errors, fails on warnings
+      # 7. ESLint — catches lint errors, fails on warnings
       - name: Lint
         run: npx eslint . --max-warnings=0 --no-warn-ignored
 
-      # 7. Next.js production build — confirms the app actually compiles
+      # 8. Next.js production build — confirms the app actually compiles
       - name: Build
         run: npm run build
