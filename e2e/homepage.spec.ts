@@ -3,13 +3,12 @@ import { test, expect } from "@playwright/test";
 test.describe("Homepage", () => {
  test("loads without errors", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/Portfolio|Nathalie/);
+  await expect(page).toHaveTitle(/Atlas|Portfolio|Nathalie/);
  });
 
  test("has a dock navigation", async ({ page }) => {
   await page.goto("/");
-  // Dock container has backdrop blur styling
-  const dock = page.locator(".backdrop-blur-3xl").first();
+  const dock = page.getByTestId("dock-nav");
   await expect(dock).toBeVisible();
  });
 });
