@@ -80,7 +80,7 @@ export function DockNav({ socialLinks, hasActiveCV, isAdmin, pageVisibility }: D
 
  return (
   <TooltipProvider delay={200}>
-   <div className="pointer-events-none fixed inset-x-0 top-4 z-30">
+   <div data-testid="dock-nav" className="pointer-events-none fixed inset-x-0 top-4 z-30">
     <Dock
      direction="down"
      magnification={70}
