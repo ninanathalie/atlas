@@ -8,7 +8,8 @@ test.describe("Homepage", () => {
 
  test("has a dock navigation", async ({ page }) => {
   await page.goto("/");
-  const dock = page.locator('nav, [role="navigation"]').first();
+  // Dock container has backdrop blur styling
+  const dock = page.locator(".backdrop-blur-3xl").first();
   await expect(dock).toBeVisible();
  });
 });
