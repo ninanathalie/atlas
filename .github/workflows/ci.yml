@@ -16,6 +16,12 @@ jobs:
     name: Test, Type Check, Lint & Build
     runs-on: ubuntu-latest
 
+    env:
+      # Provide fallback for Dependabot PRs that can't access secrets
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder' }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'ci-placeholder-secret' }}
+      NEXTAUTH_URL: http://localhost:3000
+
     steps:
       # 1. Check out the code
       - name: Checkout
