@@ -14,18 +14,15 @@ test.describe("Homepage", () => {
 });
 
 test.describe("Login page", () => {
- test("renders email and password inputs", async ({ page }) => {
+ test("renders OAuth sign-in buttons", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByLabel(/email/i)).toBeVisible();
-  await expect(page.getByLabel(/password/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /continue with github/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /continue with google/i })).toBeVisible();
  });
 
- test("shows error on invalid credentials", async ({ page }) => {
-  await page.goto("/login");
-  await page.getByLabel(/email/i).fill("invalid@example.com");
-  await page.getByLabel(/password/i).fill("wrongpassword");
-  await page.getByRole("button", { name: /sign in/i }).click();
-  // Either stays on login or shows an error message
-  await expect(page).toHaveURL(/login/);
+ test("surfaces error message from query param", async ({ page }) => {
+  await page.goto("/login?error=AccessDenied");
+  await expect(page.getByText(/isn't authorized/i)).toBeVisible();
  });
 });
