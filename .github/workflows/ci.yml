@@ -22,6 +22,9 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder' }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'ci-placeholder-secret' }}
       NEXTAUTH_URL: http://localhost:3000
+      # Sentry: DSN is public by design; auth token is optional — missing token just skips source map upload with a warning.
+      NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN || '' }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN || '' }}
 
     steps:
       # 1. Check out the code
