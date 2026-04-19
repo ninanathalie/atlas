@@ -2,3 +2,15 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+@theme inline {
+ --color-foreground: var(--foreground);
+}
+
+:root {
+ --foreground: oklch(0.145 0 0);
+}
+
+.dark {
+ --foreground: oklch(0.985 0 0);
+}
