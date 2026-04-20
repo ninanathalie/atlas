@@ -16,3 +16,13 @@
  --foreground: oklch(0.985 0 0);
  --spotlight-color: rgba(109, 40, 217, 0.2);
 }
+
+@layer utilities {
+ .bg-grid-lines {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20width%3D%228%22%20height%3D%228%22%20fill%3D%22none%22%20stroke%3D%22rgb(163%20163%20163%20%2F%200.1)%22%3E%3Cpath%20d%3D%22M0%20.5H31.5V32%22%2F%3E%3C%2Fsvg%3E");
+ }
+
+ .dark .bg-grid-lines {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20width%3D%228%22%20height%3D%228%22%20fill%3D%22none%22%20stroke%3D%22rgb(115%20115%20115%20%2F%200.1)%22%3E%3Cpath%20d%3D%22M0%20.5H31.5V32%22%2F%3E%3C%2Fsvg%3E");
+ }
+}
