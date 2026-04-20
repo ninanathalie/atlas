@@ -44,6 +44,22 @@ export default async function PublicLayout({ children }: { children: React.React
   <AuthProvider isAdmin={isAdmin}>
    <DrawerStateProvider>
     <div className="relative min-h-screen overflow-x-clip">
+     {/* Ambient pink/purple blobs + masked vignette — fixed to viewport so they stay centered */}
+     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className="bg-[#fbe2e3] dark:bg-[#be185d]/10 absolute -top-32 right-44 h-125 w-125 rounded-full blur-[10rem] sm:w-275" />
+      <div className="bg-[#dbd7fb] dark:bg-[#6d28d9]/10 absolute -top-24 -left-140 h-125 w-200 rounded-full blur-[10rem] sm:w-275 md:-left-132 lg:-left-112 xl:-left-60 2xl:-left-20" />
+      <div
+       className="absolute inset-0 bg-white dark:bg-neutral-950"
+       style={{
+        maskImage: "radial-gradient(ellipse at center, transparent 20%, black)",
+        WebkitMaskImage: "radial-gradient(ellipse at center, transparent 20%, black)",
+       }}
+      />
+     </div>
+
+     {/* Static grid lines — full viewport, above vignette so they're not covered */}
+     <div aria-hidden className="bg-grid-lines pointer-events-none fixed inset-0 z-1" />
+
      {/* Flickering grid background — fades downward */}
      <div className="absolute inset-x-0 top-0 h-24 overflow-hidden z-1 pointer-events-none">
       <FlickeringGrid
