@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { AuthProvider } from "@/components/shared/auth-provider";
 import { DrawerStateProvider } from "@/components/shared/drawer-state-provider";
+import { CursorSpotlight } from "@/components/shared/cursor-spotlight";
 import { FlickeringGrid } from "@/components/shared/flickering-grid";
 import { MaintenanceScreen } from "@/components/shared/maintenance-screen";
 import { DockNav } from "@/components/layout/dock-nav";
@@ -44,7 +45,7 @@ export default async function PublicLayout({ children }: { children: React.React
    <DrawerStateProvider>
     <div className="relative min-h-screen overflow-x-clip">
      {/* Flickering grid background — fades downward */}
-     <div className="absolute inset-x-0 top-0 h-24 overflow-hidden z-0 pointer-events-none">
+     <div className="absolute inset-x-0 top-0 h-24 overflow-hidden z-1 pointer-events-none">
       <FlickeringGrid
        className="h-full w-full"
        squareSize={2}
@@ -55,6 +56,9 @@ export default async function PublicLayout({ children }: { children: React.React
        }}
       />
      </div>
+
+     {/* Cursor-following spotlight — desktop only, respects reduced motion */}
+     <CursorSpotlight />
 
      {/* Floating dock navigation — top center */}
      <DockNav
