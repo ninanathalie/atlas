@@ -9,8 +9,10 @@
 
 :root {
  --foreground: oklch(0.145 0 0);
+ --spotlight-color: rgba(219, 215, 251, 0.6);
 }
 
 .dark {
  --foreground: oklch(0.985 0 0);
+ --spotlight-color: rgba(109, 40, 217, 0.2);
 }
