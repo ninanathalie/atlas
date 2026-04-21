@@ -3,8 +3,53 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+ font-family: "PolySans";
+ src:
+  url("/fonts/PolySans-Slim.woff2") format("woff2"),
+  url("/fonts/PolySans-Slim.woff") format("woff");
+ font-weight: 200;
+ font-display: swap;
+}
+
+@font-face {
+ font-family: "PolySans";
+ src:
+  url("/fonts/PolySans-Neutral.woff2") format("woff2"),
+  url("/fonts/PolySans-Neutral.woff") format("woff");
+ font-weight: 400;
+ font-display: swap;
+}
+
+@font-face {
+ font-family: "PolySans";
+ src:
+  url("/fonts/PolySans-Median.woff2") format("woff2"),
+  url("/fonts/PolySans-Median.woff") format("woff");
+ font-weight: 600;
+ font-display: swap;
+}
+
 @theme inline {
  --color-foreground: var(--foreground);
+ --font-sans: var(--font-albert-sans), ui-sans-serif, system-ui, sans-serif;
+ --font-mono: var(--font-space-mono), ui-monospace, SFMono-Regular, monospace;
+ --font-display: "PolySans", var(--font-albert-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+ body {
+  font-family: var(--font-sans);
+ }
+
+ h1,
+ h2,
+ h3,
+ h4,
+ h5,
+ h6 {
+  font-family: var(--font-display);
+ }
 }
 
 :root {
