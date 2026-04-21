@@ -1,20 +1,11 @@
-"use client";
-
-import { useState } from "react";
-import { ChevronRight } from "lucide-react";
-import { LogoImage } from "@/components/shared/logo-image";
-import {
- Accordion,
- AccordionItem,
- AccordionTrigger,
- AccordionContent,
-} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 interface WorkItem {
  id: string;
  title: string;
  subtitle?: string | null;
  description?: string | null;
+ skills?: string[] | null;
  logoUrl?: string | null;
  location?: string | null;
  startDate?: string | null;
@@ -26,18 +17,14 @@ interface WorkSectionProps {
 }
 
 export function WorkSection({ items }: WorkSectionProps) {
- const [value, setValue] = useState<string | undefined>(items[0]?.id);
-
  if (items.length === 0) return null;
 
  return (
-  <Accordion type="single" collapsible value={value} onValueChange={setValue}>
+  <ul className="flex flex-col gap-6">
    {items.map((item) => (
-    <AccordionItem key={item.id} value={item.id} className="border-none">
-     <AccordionTrigger className="group flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left hover:no-underline hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors [&>svg:last-child]:hidden">
-      <LogoImage letter={item.title.charAt(0).toUpperCase()} logoUrl={item.logoUrl} />
-
-      <div className="flex-1 min-w-0">
+    <li key={item.id} className="flex flex-col gap-1.5">
+     <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
+      <div className="min-w-0">
        <p className="text-sm font-medium leading-tight">{item.subtitle ?? item.title}</p>
        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
         {item.subtitle ? item.title : ""}
@@ -45,32 +32,32 @@ export function WorkSection({ items }: WorkSectionProps) {
        </p>
       </div>
 
-      <div className="hidden sm:flex items-center gap-2 text-xs tabular-nums text-neutral-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
-       {item.startDate && (
-        <span>
-         {item.startDate} – {item.endDate ?? "Present"}
-        </span>
-       )}
-      </div>
-
-      <ChevronRight className="h-4 w-4 text-neutral-400 shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 group-data-[state=open]:rotate-90" />
-     </AccordionTrigger>
+      {item.startDate && (
+       <span className="text-xs tabular-nums text-neutral-500 dark:text-neutral-400 whitespace-nowrap shrink-0">
+        {item.startDate} – {item.endDate ?? "Present"}
+       </span>
+      )}
+     </div>
 
      {item.description && (
-      <AccordionContent className="ml-11 md:ml-13">
-       <div className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-300 whitespace-pre-line">
-        {item.description}
-       </div>
-      </AccordionContent>
+      <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-300 whitespace-pre-line">
+       {item.description}
+      </p>
      )}
 
-     {item.startDate && (
-      <div className="sm:hidden ml-11 md:ml-13 -mt-2 mb-2 text-xs text-neutral-500 dark:text-neutral-400">
-       {item.startDate} – {item.endDate ?? "Present"}
-      </div>
+     {item.skills && item.skills.length > 0 && (
+      <ul className="flex flex-wrap gap-1.5 mt-1">
+       {item.skills.map((skill) => (
+        <li key={skill}>
+         <Badge variant="secondary" className="font-normal">
+          {skill}
+         </Badge>
+        </li>
+       ))}
+      </ul>
      )}
-    </AccordionItem>
+    </li>
    ))}
-  </Accordion>
+  </ul>
  );
 }

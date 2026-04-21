@@ -50,6 +50,7 @@ export const cvSectionSchema = z.object({
  title: z.string().min(1),
  subtitle: z.string().optional(),
  description: z.string().optional(),
+ skills: z.array(z.string()).optional(),
  logoUrl: z.string().optional(),
  location: z.string().optional(),
  startDate: z.string().optional(),
