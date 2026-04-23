@@ -91,6 +91,7 @@ model CVSection {
   title       String
   subtitle    String?
   description String?
+  skills      String[] @default([])
   logoUrl     String?
   location    String?
   startDate   String?
