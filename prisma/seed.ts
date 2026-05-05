@@ -65,6 +65,25 @@ async function main() {
   }
  }
 
+ // ── Blog Posts ──
+ if (data.blogs) {
+  if (data.blogs.length > 0) {
+   const blogs = data.blogs.map((b: Record<string, unknown>) => ({
+    ...b,
+    publishedAt: b.publishedAt ? new Date(b.publishedAt as string) : null,
+    scheduledAt: b.scheduledAt ? new Date(b.scheduledAt as string) : null,
+   }));
+   await prisma.$transaction([
+    prisma.blogPost.deleteMany(),
+    prisma.blogPost.createMany({ data: blogs }),
+   ]);
+   console.log("Seeded:", data.blogs.length, "blog posts");
+  } else {
+   await prisma.blogPost.deleteMany();
+   console.log("Seeded: 0 blog posts (existing posts cleared)");
+  }
+ }
+
  // ── Site Settings ──
  const existing = await prisma.siteSettings.findFirst();
  if (!existing) {
